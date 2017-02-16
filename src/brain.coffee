@@ -652,7 +652,7 @@ class Brain
       parts = match[1].split("|")
       opts  = []
       for p in parts
-        opts.push "(?:\\s|\\b)+#{p}(?:\\s|\\b)+"
+        opts.push "(?:\\s|^)+#{p}(?:\\s|$)+"
 
       # If this optional had a star or anything in it, make it non-matching.
       pipes = opts.join("|")
@@ -665,7 +665,7 @@ class Brain
       pipes = pipes.replace(/\[/g, "__lb__").replace(/\]/g, "__rb__")
 
       regexp = regexp.replace(new RegExp("\\s*\\[" + utils.quotemeta(match[1]) + "\\]\\s*"),
-        "(?:#{pipes}|(?:\\b|\\s)+)")
+        "(?:#{pipes}|(?:^|\\s)+|(?:$|\\s)+)")
       match = regexp.match(/\[(.+?)\]/)
 
     # Restore the literal square brackets.
@@ -704,7 +704,7 @@ class Brain
         name = match[1]
         rep  = ''
         if @master._var[name]
-          rep = utils.stripNasties(@master._var[name])
+          rep = utils.stripNasties(@master._var[name], @utf8)
         regexp = regexp.replace(new RegExp("<bot " + utils.quotemeta(name) + ">"), rep.toLowerCase())
 
     # Filter in user variables.
