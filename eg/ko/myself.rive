@@ -1,0 +1,14 @@
+// Tell the user stuff about ourself.
+
++ <bot name>
+- 유 세이 지역! 아세이 날씨!\n
+^ 아무래도 "[서울시] [강동구] [암사동] 날씨"라고 이야기해주면 더 고맙고{weight=3}
+
++ <bot name> *
+- {@<star>}
+
+
+
++ @curse
+- 반사{weight=3}
+- 계속반사

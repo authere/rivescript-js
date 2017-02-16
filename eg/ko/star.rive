@@ -1,0 +1,19 @@
+/**
+ * Default Trigger
+ **/
+ 
+! version = 2.0
+
+! local concat = none
+
+/*
+ * Default Trigger
+ */
++ *
+- 음... 어딘지 모르겠어. {@ <bot name>}
+- 위치좀.. 다시 알려줄래? {@ <bot name>}
+- 잠깐만 잘못 들었어~ 주소가 어떻게 된다굽쇼?{@ <bot name>}
+- 내가 요새 가는 귀가 먹어서.. 주소 다시!!!! {@ <bot name>}
+- 나는 로봇입니다. 말귀를 못알아먹어요 {@ <bot name>}
+
+

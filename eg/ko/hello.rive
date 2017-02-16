@@ -1,0 +1,25 @@
+/**
+ * Default Trigger
+ **/
+ 
+! version = 2.0
+
+! local concat = none
+
++ (@hello)
+- 안녕 나는 <bot name>이야 {@ <bot name>}{weight=20}
+- 방가릐~ 나는 <bot name>! {@ <bot name>}{weight=5}
+- 나이스투미츄! 나는 <bot name>! {@ <bot name>}{weight=5}
+- 왔섭! 나는 <bot name>이야 {@ <bot name>}{weight=5}
+- 반갑다잉~ 나는 <bot name>이야 {@ <bot name>}{weight=5}
+
+
++ [*] (@thank) [*]
+- 제가 더 기뻐요{weight=20}
+- 오히려 제가 감사합니다{weight=20}
+- 별말씀을{weight=7}
+- 별말씀을요{weight=8}
+- 아리가또고자이마쓰{weight=10}
+- 이 정도쯤이야 훗{weight=10}
+- 알아주니 송구스러울 따름 ㅋ{weight=10}
+- 아 네~{weight=5}
