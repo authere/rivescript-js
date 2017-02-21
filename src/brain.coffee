@@ -652,7 +652,7 @@ class Brain
       parts = match[1].split("|")
       opts  = []
       for p in parts
-        opts.push "(?:\\s|^)+#{p}(?:\\s|$)+"
+        opts.push "(?:\\s|^)+#{p}(?:\\s|$)*"
 
       # If this optional had a star or anything in it, make it non-matching.
       pipes = opts.join("|")
@@ -665,7 +665,7 @@ class Brain
       pipes = pipes.replace(/\[/g, "__lb__").replace(/\]/g, "__rb__")
 
       regexp = regexp.replace(new RegExp("\\s*\\[" + utils.quotemeta(match[1]) + "\\]\\s*"),
-        "(?:#{pipes}|(?:^|\\s)+|(?:$|\\s)+)")
+        "(?:#{pipes}|(?:^|\\s)*|(?:$|\\s)*)")
       match = regexp.match(/\[(.+?)\]/)
 
     # Restore the literal square brackets.

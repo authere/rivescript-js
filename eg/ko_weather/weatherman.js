@@ -9,6 +9,7 @@
 var readline = require("readline");
 var request = require("request");
 var colors = require('colors');
+var _ = require('lodash');
 
 if (!process.env.MECAB_LIB_PATH) {
   process.env.MECAB_LIB_PATH = '/usr/local';
@@ -20,7 +21,7 @@ const APPKEY = process.env.APPKEY || 'change me';
 // This would just be require("rivescript") if not for running this
 // example from within the RiveScript project.
 var RiveScript = require("../../lib/rivescript");
-var rs = new RiveScript({utf8: true/*, debug: true*/});
+var rs = new RiveScript({utf8: true, debug: true});
 
 var getWeather = function(args, cb) {
   var params = {};
@@ -125,7 +126,16 @@ var bot = new AsyncBot(function() {
     if (cmd === "/quit") {
       process.exit(0);
     } else {
-      mecab.morphs(cmd, (err, words) => {
+      mecab.pos(cmd, (err, tags) => {
+        let words = [];
+        _.each(tags, (t) => {
+          if (!_.startsWith(t[1], 'J') && !_.startsWith(t[1], 'S') ) { // not josa or symbol
+            words.push(t[0]);
+            //console.log('add:', t[0], t[1]);
+          } else {
+            console.log('remove:', t[0], t[1]);
+          }
+        });
         console.log('morphs:', words.join(' '));
         bot.getReply(nick, words.join(' '), function(error, reply){
           if (error) {
