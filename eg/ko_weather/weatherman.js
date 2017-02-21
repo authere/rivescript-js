@@ -10,6 +10,11 @@ var readline = require("readline");
 var request = require("request");
 var colors = require('colors');
 
+if (!process.env.MECAB_LIB_PATH) {
+  process.env.MECAB_LIB_PATH = '/usr/local';
+}
+var mecab = require('mecab-ya');
+
 const APPKEY = process.env.APPKEY || 'change me';
 
 // This would just be require("rivescript") if not for running this
@@ -120,13 +125,16 @@ var bot = new AsyncBot(function() {
     if (cmd === "/quit") {
       process.exit(0);
     } else {
-      bot.getReply(nick, cmd, function(error, reply){
-        if (error) {
-          bot.sendMessage(nick, "Oops. The weather service is not cooperating!");
-        } else {
-          bot.sendMessage(nick, reply);
-        }
-        rl.prompt();
+      mecab.morphs(cmd, (err, words) => {
+        console.log('morphs:', words.join(' '));
+        bot.getReply(nick, words.join(' '), function(error, reply){
+          if (error) {
+            bot.sendMessage(nick, "Oops. The weather service is not cooperating!");
+          } else {
+            bot.sendMessage(nick, reply);
+          }
+          rl.prompt();
+        });
       });
     }
   }).on("close", function() {
