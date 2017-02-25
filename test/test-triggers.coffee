@@ -32,12 +32,20 @@ exports.test_wildcard_triggers = (test) ->
 
     + i am * years old
     - Say that with fewer words.
-  """)
+
+    + (서울) (서초구) (반포동) [날씨] *
+    - 날씨 맑아요
+
+    + (서울) (서초구) (반포동) [온도] #
+    - 온도는 <star4>
+  """, {utf8: true})
   bot.reply("my name is Bob", "Nice to meet you, bob.")
   bot.reply("bob told me to say hi", "Why did bob tell you to say hi?")
   bot.reply("i am 5 years old", "A lot of people are 5.")
   bot.reply("i am five years old", "Say that with numbers.")
   bot.reply("i am twenty five years old", "Say that with fewer words.")
+  bot.reply("서울 서초구 반포동 날씨 어때요?", "날씨 맑아요")
+  bot.reply("서울 서초구 반포동 온도 5", "온도는 5")
   test.done()
 
 exports.test_alternatives_and_optionals = (test) ->

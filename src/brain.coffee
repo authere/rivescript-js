@@ -366,6 +366,7 @@ class Brain
                 if msg is regexp
                   isMatch = true
               else
+                #console.log('prev msg', msg, 'regexp', regexp, 'match', match)
                 match = msg.match(new RegExp("^#{regexp}$"))
                 if match
                   isMatch = true
@@ -402,6 +403,7 @@ class Brain
         else
           # Non-atomic triggers always need the regexp.
           match = msg.match(new RegExp("^#{regexp}$"))
+          #console.log('msg', msg, 'regexp', regexp, 'match', match)
           if match
             # The regexp matched!
             isMatch = true
@@ -614,6 +616,7 @@ class Brain
     regexp = regexp.replace(/^\*$/, "<zerowidthstar>")
 
     # Simple replacements.
+    regexp = regexp.replace(/\]\s+\*/g, "\](?:$|\\s)+(.+?)")   # Convert * into (.+?)
     regexp = regexp.replace(/\*/g, "(.+?)")   # Convert * into (.+?)
     regexp = regexp.replace(/#/g,  "(\\d+?)") # Convert # into (\d+?)
     regexp = regexp.replace(/_/g,  "(\\w+?)") # Convert _ into (\w+?)
@@ -665,7 +668,7 @@ class Brain
       pipes = pipes.replace(/\[/g, "__lb__").replace(/\]/g, "__rb__")
 
       regexp = regexp.replace(new RegExp("\\s*\\[" + utils.quotemeta(match[1]) + "\\]\\s*"),
-        "(?:#{pipes}|(?:^|\\s)*|(?:$|\\s)*)")
+        "(?:#{pipes}|(?:\\s|^)+|(?:\\s|$)*)")
       match = regexp.match(/\[(.+?)\]/)
 
     # Restore the literal square brackets.
