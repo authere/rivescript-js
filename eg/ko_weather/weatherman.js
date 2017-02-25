@@ -8,13 +8,13 @@
 'use strict';
 var readline = require("readline");
 var request = require("request");
-var colors = require('colors');
 var _ = require('lodash');
 
 if (!process.env.MECAB_LIB_PATH) {
   process.env.MECAB_LIB_PATH = '/usr/local';
 }
-var mecab = require('mecab-ya');
+//var mecab = require('mecab-ya');
+var mecab = require('/Users/lysoo/sotong/node-mecab-ya');
 
 const APPKEY = process.env.APPKEY || 'change me';
 
@@ -88,7 +88,7 @@ var AsyncBot = function(onReady) {
     self.sendMessage = function(username, message) {
       // This just logs it to the console like "[Bot] @username: message"
       console.log(
-        ["[날씨봇]", message].join(": ").underline.green
+        ["[날씨봇]", message].join(": ")
       );
     };
 
@@ -119,25 +119,19 @@ var bot = new AsyncBot(function() {
   rl.on("line", function(cmd) {
     // If this was an IRC bot, imagine "nick" came from the server as the
     // sending user's IRC nickname.
-    var nick = "날씨봇";
+    var nick = "나";
     console.log("[" + nick + "] " + cmd);
 
     // Handle commands.
     if (cmd === "/quit") {
       process.exit(0);
     } else {
-      mecab.pos(cmd, (err, tags) => {
+      mecab.orgform(cmd, (err, tags) => {
         let words = [];
         _.each(tags, (t) => {
-          if (!_.startsWith(t[1], 'J') && !_.startsWith(t[1], 'S') ) { // not josa or symbol
-            words.push(t[0]);
-            //console.log('add:', t[0], t[1]);
-          } else {
-            console.log('remove:', t[0], t[1]);
-          }
+          words.push(t[0]);
         });
-        console.log('morphs:', words.join(' '));
-        //mecab.morphs(cmd, (err, rtn) => { console.log('morphs', rtn); });
+        console.log('simple orgform:', words.join(' '));
         bot.getReply(nick, words.join(' '), function(error, reply){
           if (error) {
             bot.sendMessage(nick, "Oops. The weather service is not cooperating!");

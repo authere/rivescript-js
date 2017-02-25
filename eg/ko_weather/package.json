@@ -4,9 +4,8 @@
   "description": "Your weather report",
   "main": "weatherman.js",
   "dependencies": {
-    "colors": "^1.1.2",
     "lodash": "^4.17.4",
-    "mecab-ya": "^0.1.1",
+    "mecab-ya": "git+https://github.com/authere/node-mecab-ya.git",
     "request": "^2.69.0"
   }
 }
