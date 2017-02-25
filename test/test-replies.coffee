@@ -24,6 +24,13 @@ exports.test_previous = (test) ->
     + ask me a question
     - How many arms do I have?
 
+    + 오늘 날씨를 물어봐
+    - 오늘 온도가 얼마야? 
+    
+    + 온도는 #도입니다
+    % 오늘 온도가 얼마야?
+    - 오늘 온도는 <star>도군요
+
     + [*] # [*]
     % how many arms do i have
     * <star> == 2 => Yes!
@@ -35,7 +42,8 @@ exports.test_previous = (test) ->
 
     + *
     - I don't know.
-  """)
+    
+  """, {utf8: true})
   bot.reply("knock knock", "Who's there?")
   bot.reply("Canoe", "Canoe who?")
   bot.reply("Canoe help me with my homework?", "Haha! Canoe help me with my homework!")
@@ -46,6 +54,8 @@ exports.test_previous = (test) ->
   bot.reply("2", "Yes!")
   bot.reply("Ask me a question", "How many arms do I have?")
   bot.reply("lol", "That isn't a number.")
+  bot.reply("오늘 날씨를 물어봐", "오늘 온도가 얼마야?")
+  bot.reply("온도는 5도입니다", "오늘 온도는 5도군요")
   test.done()
 
 exports.test_random = (test) ->

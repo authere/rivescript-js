@@ -21,7 +21,7 @@ const APPKEY = process.env.APPKEY || 'change me';
 // This would just be require("rivescript") if not for running this
 // example from within the RiveScript project.
 var RiveScript = require("../../lib/rivescript");
-var rs = new RiveScript({utf8: true, debug: true});
+var rs = new RiveScript({utf8: true/*, debug: true*/});
 
 var getWeather = function(args, cb) {
   var params = {};
@@ -137,6 +137,7 @@ var bot = new AsyncBot(function() {
           }
         });
         console.log('morphs:', words.join(' '));
+        //mecab.morphs(cmd, (err, rtn) => { console.log('morphs', rtn); });
         bot.getReply(nick, words.join(' '), function(error, reply){
           if (error) {
             bot.sendMessage(nick, "Oops. The weather service is not cooperating!");
