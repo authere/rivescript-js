@@ -136,6 +136,14 @@ exports.test_objects_in_conditions = (test) ->
       });
     < object
 
+    // ends with _async_ works as async
+    > object test_async_condition_async_ javascript
+      //rs, args, cb(err, result)
+      setTimeout(function() {
+        cb.call(this, null, args[0] === "1" ? "true" : "false");
+      }, 10);
+    < object
+
     + test sync *
     * <call>test_condition <star></call> == true  => True.
     * <call>test_condition <star></call> == false => False.
@@ -151,6 +159,9 @@ exports.test_objects_in_conditions = (test) ->
 
     + call async *
     - Result: <call>test_async_condition <star></call>
+
+    + call async with name *
+    - Result: <call>test_async_condition_async_ <star></call>
   """)
   # First, make sure the sync object works.
   bot.reply("call sync 1", "Result: true")
@@ -172,7 +183,10 @@ exports.test_objects_in_conditions = (test) ->
     # Now test that it still won't work in a conditional even with replyAsync.
     bot.rs.replyAsync(bot.username, "test async 1").then((reply) ->
       test.equal(reply, "Call failed.")
-      test.done()
+      bot.rs.replyAsync(bot.username, "call async with name 1").then((reply) ->
+        test.equal(reply, "Result: true")
+        test.done()
+      )
     )
   )
 
