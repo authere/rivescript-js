@@ -24,26 +24,51 @@ var RiveScript = require("../../lib/rivescript");
 var rs = new RiveScript({utf8: true/*, debug: true*/});
 
 var getWeather = function(args, cb) {
-  var params = {};
-  args.forEach(function(v) {
-    var sp = v.split('=');
-    params[sp[0]] = sp[1];
-  });
+  var user = rs.currentUser();
+  var params = rs.getUservars(user);
+  console.log('params', params);
+  //var pos = vars.pos.split(',');
+  var url, qs;
+ 
+  if (params.forecast === 'true') {
+    url = 'http://apis.skplanetx.com/weather/summary';
+    qs = {lat: params.lat, lon: params.lon, version: 1};
+  } else {
+    url = 'http://apis.skplanetx.com/weather/current/minutely';
+    qs = {village: params.town, county: params.sigungu, city: params.sido, version: 1};
+  }
   request.get({
-    url: 'http://apis.skplanetx.com/weather/current/minutely',
+    url: url,
+    qs: qs,
     headers: {
       'appKey': APPKEY
     },
-    qs: {village: params.town, county: params.sigungu, city: params.sido, version: 1},
     json:true
   }, function (err, res, body) {
     let msg = '날씨를 가져오는데 실패 했어요.';
     if (!err && res.statusCode === 200) {
-      let weather = body && body.weather && body.weather.minutely[0];
+      let weather;
+      if (params.forecast === 'true') {
+        weather = body && body.weather && body.weather.summary[0][params.when];
+      } else {
+        weather = body && body.weather && body.weather.minutely[0];
+      }
       if (weather) {
-        let temp = parseInt(weather.temperature.tc);
-        msg = '지금 날씨는 "' + weather.sky.name + '" 이고,  현재온도는 ' + 
-          (temp < 0 ? '영하' +  Math.abs(temp): temp) + ' 도 입니다.';
+        msg = `날씨는 "${weather.sky.name}" 이고, `;
+        if (weather.temperature.tc) {
+          msg += `현재 온도는 ${parseInt(weather.temperature.tc)} 도`;
+        }
+        if (weather.temperature.tmax) {
+          msg += `최고 온도는 ${parseInt(weather.temperature.tmax)} 도`;
+        }
+        if (weather.temperature.tmin) {
+          msg += `최처 온도는 ${parseInt(weather.temperature.tmin)} 도`;
+        }
+        msg += '입니다';
+        if (weather.station) {
+          rs.setUservar(user, 'lat', weather.station.latitude);
+          rs.setUservar(user, 'lon', weather.station.longitude);
+        }
       }
     } else {
       if (body && body.error && body.error.message) {
@@ -132,6 +157,8 @@ var bot = new AsyncBot(function() {
           words.push(t[0]);
         });
         console.log('simple orgform:', words.join(' '));
+        //set variable: with pos
+        rs.setUservar(nick, 'pos', _.flatten(tags).toString());
         bot.getReply(nick, words.join(' '), function(error, reply){
           if (error) {
             bot.sendMessage(nick, "Oops. The weather service is not cooperating!");
