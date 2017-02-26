@@ -33,7 +33,7 @@ class JSObjectHandler
       @_objects[name] = code
     else
       # We need to make a dynamic JavaScript function.
-      source = "this._objects[\"" + name + "\"] = function(rs, args) {\n" \
+      source = "this._objects[\"" + name + "\"] = function(rs, args, cb) {\n" \
         + code.join("\n") \
         + "}\n"
 
@@ -56,7 +56,15 @@ class JSObjectHandler
     func = @_objects[name]
     reply = ""
     try
-      reply = func.call(scope, rs, fields)
+      if name.endsWith('_async_')
+        reply = new rs.Promise (resolve, reject) ->
+          func.call scope, rs, fields, (error, data) ->
+            if error
+              reject error
+            else
+              resolve data
+      else
+        reply = func.call(scope, rs, fields)
     catch e
       reply = "[ERR: Error when executing JavaScript object: #{e.message}]"
 

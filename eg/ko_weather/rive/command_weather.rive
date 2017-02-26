@@ -1,3 +1,67 @@
+> object getName javascript
+//rs, args
+ return rs.getVariable('name')
+< object
+
+> object getWeather_async_ javascript
+//rs, args, cb
+var request = rs.utils.request;
+var _ = rs.utils._;
+var APPKEY = process.env.APPKEY;
+var user = rs.currentUser();
+var params = rs.getUservars(user);
+//var pos = vars.pos.split(',');
+var url, qs;
+
+//console.log('params', params);
+
+if (params.forecast === 'true') {
+  url = 'http://apis.skplanetx.com/weather/summary';
+  qs = {lat: params.lat, lon: params.lon, version: 1};
+} else {
+  url = 'http://apis.skplanetx.com/weather/current/minutely';
+  qs = {village: params.town, county: params.sigungu, city: params.sido, version: 1};
+}
+request.get({
+  url: url,
+  qs: qs,
+  headers: { 'appKey': APPKEY },
+  json:true
+}, function (err, res, body) {
+  let msg = '날씨를 가져오는데 실패 했어요.';
+  if (!err && res.statusCode === 200) {
+    let weather;
+    if (params.forecast === 'true') {
+      weather = body && body.weather && body.weather.summary[0][params.when];
+    } else {
+      weather = body && body.weather && body.weather.minutely[0];
+    }
+    if (weather) {
+      msg = `날씨는 "${weather.sky.name}" 이고, `;
+      if (weather.temperature.tc) {
+        msg += `현재 온도는 ${parseInt(weather.temperature.tc)} 도`;
+      }
+      if (weather.temperature.tmax) {
+        msg += `최고 온도는 ${parseInt(weather.temperature.tmax)} 도`;
+      }
+      if (weather.temperature.tmin) {
+        msg += `최처 온도는 ${parseInt(weather.temperature.tmin)} 도`;
+      }
+      msg += '입니다';
+      if (weather.station) {
+        rs.setUservar(user, 'lat', weather.station.latitude);
+        rs.setUservar(user, 'lon', weather.station.longitude);
+      }
+    }
+  } else {
+    if (body && body.error && body.error.message) {
+      msg += ' 이유는: "' + body.error.message + '"';
+    }
+  }
+  return cb.call(this, null, msg);
+});
+< object
+
 //> topic weather
 ! sub 어제 = yesterday
 ! sub 지금 = today
@@ -9,29 +73,32 @@
 
 //	시도 시군구 읍면동
 + [*] (@sido) [*] (@sigungu) (@town) [@weather] [@show] [*]
-- <set sido=<star1>><set sigungu=<star2>><set town=<star3>>오늘 <get sido> <get sigungu> <get town>의 날씨입니다. <call>getWeather</call> 어제, 오늘, 모레 날씨 예보를 보실수 있습니다. 어느 예보를 원하시나요?
+- <set sido=<star1>><set sigungu=<star2>><set town=<star3>>오늘 <get sido> <get sigungu> <get town>의 날씨입니다. <call>getWeather_async_</call> 어제, 오늘, 모레 날씨 예보를 보실수 있습니다. 어느 예보를 원하시나요?
 
 //	시도
 + [*] (@sido) [*] [@weather] [@show] [*]
 * <get sigungu> == undefined => <set sido=<star1>>시군구를 입력해 주세요.
 * <get town> == undefined => <set sido=<star1>>읍면동을 입력해 주세요.
-- <set sido=<star1>>오늘 <get sido> <get sigungu> <get town>의 날씨입니다. <call>getWeather</call> 어제, 오늘, 모레 날씨 예보를 보실수 있습니다. 어느 예보를 원하시나요?
+- <set sido=<star1>>오늘 <get sido> <get sigungu> <get town>의 날씨입니다. <call>getWeather_async_</call> 어제, 오늘, 모레 날씨 예보를 보실수 있습니다. 어느 예보를 원하시나요?
 
 //	시군구
 + [*] (@sigungu) [*] [@weather] [@show] [*]
 * <get sido> == undefined => <set sigungu=<star1>>시도를 입력해 주세요.
 * <get town> == undefined => <set sigungu=<star1>>읍면동을 입력해 주세요.
-- <set sigungu=<star1>>오늘 <get sido> <get sigungu> <get town>의 날씨입니다. <call>getWeather</call> 어제, 오늘, 모레 날씨 예보를 보실수 있습니다. 어느 예보를 원하시나요?
+- <set sigungu=<star1>>오늘 <get sido> <get sigungu> <get town>의 날씨입니다. <call>getWeather_async_</call> 어제, 오늘, 모레 날씨 예보를 보실수 있습니다. 어느 예보를 원하시나요?
 
 //	읍면동
 + [*] (@town) [@weather] [@show] [*]
 * <get sido> == undefined => <set town=<star1>>시도를 입력해 주세요.
 * <get sigungu> == undefined => <set town=<star1>>시군구를 입력해 주세요.
-- <set town=<star1>>오늘 <get sido> <get sigungu> <get town>의 날씨입니다. <call>getWeather</call> 예보를 볼 수 있습니다. 어제, 오늘, 모레를 선택해 주세요? 
+- <set town=<star1>>오늘 <get sido> <get sigungu> <get town>의 날씨입니다. <call>getWeather_async_</call> 예보를 볼 수 있습니다. 어제, 오늘, 모레를 선택해 주세요? 
 
 // 예보
 + (yesterday|today|tomorrow|dayAfterTomorrow) [*]
-- <set when=<star1>><set forecast=true><call>getWeather</call>
+- <set when=<star1>><set forecast=true><call>getWeather_async_</call>
+
++ 이름 [*]
+- <call>getName</call>
 
 + *
 - 오늘 날씨를 알려드립니다. 지역을 자세히 알려주세요. 예를 들면 "[서울시] [강동구] [암사동]"

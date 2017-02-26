@@ -23,74 +23,10 @@ const APPKEY = process.env.APPKEY || 'change me';
 var RiveScript = require("../../lib/rivescript");
 var rs = new RiveScript({utf8: true/*, debug: true*/});
 
-var getWeather = function(args, cb) {
-  var user = rs.currentUser();
-  var params = rs.getUservars(user);
-  console.log('params', params);
-  //var pos = vars.pos.split(',');
-  var url, qs;
- 
-  if (params.forecast === 'true') {
-    url = 'http://apis.skplanetx.com/weather/summary';
-    qs = {lat: params.lat, lon: params.lon, version: 1};
-  } else {
-    url = 'http://apis.skplanetx.com/weather/current/minutely';
-    qs = {village: params.town, county: params.sigungu, city: params.sido, version: 1};
-  }
-  request.get({
-    url: url,
-    qs: qs,
-    headers: {
-      'appKey': APPKEY
-    },
-    json:true
-  }, function (err, res, body) {
-    let msg = '날씨를 가져오는데 실패 했어요.';
-    if (!err && res.statusCode === 200) {
-      let weather;
-      if (params.forecast === 'true') {
-        weather = body && body.weather && body.weather.summary[0][params.when];
-      } else {
-        weather = body && body.weather && body.weather.minutely[0];
-      }
-      if (weather) {
-        msg = `날씨는 "${weather.sky.name}" 이고, `;
-        if (weather.temperature.tc) {
-          msg += `현재 온도는 ${parseInt(weather.temperature.tc)} 도`;
-        }
-        if (weather.temperature.tmax) {
-          msg += `최고 온도는 ${parseInt(weather.temperature.tmax)} 도`;
-        }
-        if (weather.temperature.tmin) {
-          msg += `최처 온도는 ${parseInt(weather.temperature.tmin)} 도`;
-        }
-        msg += '입니다';
-        if (weather.station) {
-          rs.setUservar(user, 'lat', weather.station.latitude);
-          rs.setUservar(user, 'lon', weather.station.longitude);
-        }
-      }
-    } else {
-      if (body && body.error && body.error.message) {
-        msg += ' 이유는: "' + body.error.message + '"';
-      }
-    }
-    return cb && cb.call(this, null, msg);
-  });
+rs.utils = {
+  request: request,
+  _: _
 };
-
-
-rs.setSubroutine("getWeather", function (rs, args)  {
-  return new rs.Promise(function(resolve, reject) {
-    getWeather(args, function(error, data){
-      if(error) {
-        reject(error);
-      } else {
-        resolve(data);
-      }
-    });
-  });
-});
 
 // Create a prototypical class for our own chatbot.
 var AsyncBot = function(onReady) {
@@ -161,6 +97,7 @@ var bot = new AsyncBot(function() {
         rs.setUservar(nick, 'pos', _.flatten(tags).toString());
         bot.getReply(nick, words.join(' '), function(error, reply){
           if (error) {
+            console.log('Error', error);
             bot.sendMessage(nick, "Oops. The weather service is not cooperating!");
           } else {
             bot.sendMessage(nick, reply);
